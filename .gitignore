@@ -20,3 +20,4 @@ _site/
 *.swo
 .flattened-pom.xml
 .DS_Store
+sample-out.txt
