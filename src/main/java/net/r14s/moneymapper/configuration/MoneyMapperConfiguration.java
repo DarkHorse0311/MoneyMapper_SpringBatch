@@ -10,6 +10,7 @@ import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.item.ItemProcessor;
+import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.file.FlatFileItemReader;
 import org.springframework.batch.item.file.FlatFileItemWriter;
 import org.springframework.batch.item.file.builder.FlatFileItemWriterBuilder;
@@ -43,7 +44,7 @@ public class MoneyMapperConfiguration {
 
 	@Bean
 	public Step stepReadAndStoreRawTransactions(JobRepository jobRepository, PlatformTransactionManager transactionManager,
-			FlatFileItemReader<Transaction> itemReader,
+			ItemReader<Transaction> itemReader,
 			ItemProcessor<Transaction, Transaction> itemProcessor,
 			FlatFileItemWriter<Transaction> itemWriter) {
 		return new StepBuilder("stepReadAndStoreRawTransactions", jobRepository)
