@@ -23,18 +23,19 @@ import org.springframework.batch.item.file.transform.FieldSet;
 import org.springframework.batch.item.file.transform.FieldSetFactory;
 import org.springframework.batch.item.file.transform.LineTokenizer;
 import org.springframework.batch.item.file.transform.PatternMatchingCompositeLineTokenizer;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.stereotype.Component;
+import org.springframework.core.io.Resource;
 
-@Component
+
 public class MultilineQFXReader implements ItemReader<Transaction>, ItemStream {
 
 	private FlatFileItemReader<FieldSet> delegate;
 
-	public MultilineQFXReader() {
+	private final StatementTransactionTokenizer statementTransactionTokenizer = new StatementTransactionTokenizer();
+
+	public MultilineQFXReader(Resource resource) {
 		delegate = new FlatFileItemReader<>();
 
-		delegate.setResource(new ClassPathResource("quickenExport-sample.QFX"));
+		delegate.setResource(resource);
 
 		DefaultLineMapper lineMapper = new DefaultLineMapper();
 
@@ -52,10 +53,10 @@ public class MultilineQFXReader implements ItemReader<Transaction>, ItemStream {
 
 		Map<String, LineTokenizer> tokenizerMap = new HashMap<>();
 
-		tokenizerMap.put("<STMTTRN>", new StatementTransactionTokenizer());
-		tokenizerMap.put("<TRNAMT>*", new StatementTransactionTokenizer());
-		tokenizerMap.put("<NAME>*", new StatementTransactionTokenizer());
-		tokenizerMap.put("</STMTTRN>", new StatementTransactionTokenizer());
+		tokenizerMap.put("<STMTTRN>", statementTransactionTokenizer);
+		tokenizerMap.put("<TRNAMT>*", statementTransactionTokenizer);
+		tokenizerMap.put("<NAME>*", statementTransactionTokenizer);
+		tokenizerMap.put("</STMTTRN>", statementTransactionTokenizer);
 		tokenizerMap.put("*", new DefaultTokenizer()); //ignore anything that isn't a tag of interest
 
 		lineTokenizer.setTokenizers(tokenizerMap);

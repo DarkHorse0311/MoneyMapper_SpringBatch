@@ -1,5 +1,6 @@
 package net.r14s.moneymapper.configuration;
 
+import net.r14s.moneymapper.batch.MultilineQFXReader;
 import net.r14s.moneymapper.batch.TransactionProcessor;
 import net.r14s.moneymapper.domain.Transaction;
 
@@ -16,6 +17,7 @@ import org.springframework.batch.item.file.FlatFileItemWriter;
 import org.springframework.batch.item.file.builder.FlatFileItemWriterBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.PathResource;
 import org.springframework.transaction.PlatformTransactionManager;
 
@@ -41,6 +43,11 @@ public class MoneyMapperConfiguration {
 				.build();
 	}
 
+
+	@Bean
+	public ItemReader itemReader() {
+		return new MultilineQFXReader(new ClassPathResource("quickenExport-sample.QFX"));
+	}
 
 	@Bean
 	public Step stepReadAndStoreRawTransactions(JobRepository jobRepository, PlatformTransactionManager transactionManager,
