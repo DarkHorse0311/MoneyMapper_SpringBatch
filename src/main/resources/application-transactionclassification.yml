@@ -1,0 +1,7 @@
+transactionclassification:
+  configurations:
+    - description: "NATIONWIDE"
+      tag: "Committed"
+      category: "Insurance"
+    - description: "ONLINE CREDIT CA"
+      tag: "Account Transfer"

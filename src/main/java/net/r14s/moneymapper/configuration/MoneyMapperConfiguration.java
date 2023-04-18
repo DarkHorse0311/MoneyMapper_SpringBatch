@@ -26,11 +26,6 @@ public class MoneyMapperConfiguration {
 
 
 	@Bean
-	public ItemProcessor<Transaction, Transaction> transactionProcessor() {
-		return new TransactionProcessor();
-	}
-
-	@Bean
 	public FlatFileItemWriter<Transaction> writeFinalOutputToCSV() {
 
 		return new FlatFileItemWriterBuilder<Transaction>()
@@ -39,7 +34,7 @@ public class MoneyMapperConfiguration {
 				.lineSeparator("\r\n")
 				.delimited()
 				.delimiter(",")
-				.fieldExtractor(transaction -> new Object[] {transaction.getDescription(), transaction.getAmount()})
+				.fieldExtractor(transaction -> new Object[] {transaction.getDescription(), transaction.getAmount(), transaction.getTag(), transaction.getCategory()})
 				.build();
 	}
 
