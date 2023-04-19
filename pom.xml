@@ -8,7 +8,7 @@
 		<version>3.0.5</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
-	<groupId>net.r14s</groupId>
+	<groupId>dev.mcnees</groupId>
 	<artifactId>money-mapper</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>money-mapper</name>

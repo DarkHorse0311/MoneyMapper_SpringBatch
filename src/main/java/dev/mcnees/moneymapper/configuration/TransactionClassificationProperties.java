@@ -1,8 +1,8 @@
-package net.r14s.moneymapper.configuration;
+package dev.mcnees.moneymapper.configuration;
 
 import java.util.List;
 
-import net.r14s.moneymapper.domain.TransactionClassification;
+import dev.mcnees.moneymapper.domain.TransactionClassification;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;

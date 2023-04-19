@@ -1,10 +1,10 @@
-package net.r14s.moneymapper.batch;
+package dev.mcnees.moneymapper.batch;
 
 import java.util.List;
 
-import net.r14s.moneymapper.configuration.TransactionClassificationProperties;
-import net.r14s.moneymapper.domain.Transaction;
-import net.r14s.moneymapper.domain.TransactionClassification;
+import dev.mcnees.moneymapper.configuration.TransactionClassificationProperties;
+import dev.mcnees.moneymapper.domain.Transaction;
+import dev.mcnees.moneymapper.domain.TransactionClassification;
 
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.stereotype.Component;

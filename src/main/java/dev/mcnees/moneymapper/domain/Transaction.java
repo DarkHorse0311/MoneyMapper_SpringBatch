@@ -1,4 +1,4 @@
-package net.r14s.moneymapper.domain;
+package dev.mcnees.moneymapper.domain;
 
 public class Transaction {
 

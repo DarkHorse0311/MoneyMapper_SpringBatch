@@ -1,4 +1,4 @@
-package net.r14s.moneymapper;
+package dev.mcnees.moneymapper;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

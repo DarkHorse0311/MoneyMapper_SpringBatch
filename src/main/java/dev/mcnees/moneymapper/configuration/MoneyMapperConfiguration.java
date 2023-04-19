@@ -1,8 +1,7 @@
-package net.r14s.moneymapper.configuration;
+package dev.mcnees.moneymapper.configuration;
 
-import net.r14s.moneymapper.batch.MultilineQFXReader;
-import net.r14s.moneymapper.batch.TransactionProcessor;
-import net.r14s.moneymapper.domain.Transaction;
+import dev.mcnees.moneymapper.batch.MultilineQFXReader;
+import dev.mcnees.moneymapper.domain.Transaction;
 
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
@@ -12,7 +11,6 @@ import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.ItemReader;
-import org.springframework.batch.item.file.FlatFileItemReader;
 import org.springframework.batch.item.file.FlatFileItemWriter;
 import org.springframework.batch.item.file.builder.FlatFileItemWriterBuilder;
 import org.springframework.context.annotation.Bean;

@@ -1,4 +1,4 @@
-package net.r14s.moneymapper.batch;
+package dev.mcnees.moneymapper.batch;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import net.r14s.moneymapper.domain.Transaction;
+import dev.mcnees.moneymapper.domain.Transaction;
 
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.item.ItemReader;
