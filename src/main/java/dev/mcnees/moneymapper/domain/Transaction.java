@@ -2,6 +2,18 @@ package dev.mcnees.moneymapper.domain;
 
 public class Transaction {
 
+	public Transaction() {
+
+	}
+
+	public Transaction(String id, String description, Double amount, String tag, String category) {
+		this.id = id;
+		this.description = description;
+		this.amount = amount;
+		this.tag = tag;
+		this.category = category;
+	}
+
 	private String id;
 
 	private String description;

@@ -4,7 +4,9 @@ import java.io.File;
 
 import javax.sql.DataSource;
 
+import dev.mcnees.moneymapper.batch.AccountTransferProcessor;
 import dev.mcnees.moneymapper.batch.MultilineQFXReader;
+import dev.mcnees.moneymapper.batch.TransactionProcessor;
 import dev.mcnees.moneymapper.domain.Transaction;
 
 import org.springframework.batch.core.Job;
@@ -72,7 +74,7 @@ public class MoneyMapperConfiguration {
 	}
 
 	@Bean
-	public JdbcBatchItemWriter<Transaction> transactionDataTableUpdate(DataSource dataSource) {
+	public JdbcBatchItemWriter<Transaction> transactionDataTableCategoryUpdate(DataSource dataSource) {
 		String sql = "update MONEY_MAPPER set TAG=:tag, CATEGORY=:category where ID=:id";
 		return new JdbcBatchItemWriterBuilder<Transaction>()
 				.dataSource(dataSource)
@@ -80,6 +82,17 @@ public class MoneyMapperConfiguration {
 				.beanMapped()
 				.build();
 	}
+
+	@Bean
+	public JdbcBatchItemWriter<Transaction> transactionDataTableTransferUpdate(DataSource dataSource) {
+		String sql = "update MONEY_MAPPER set TAG=:tag where ID=:id";
+		return new JdbcBatchItemWriterBuilder<Transaction>()
+				.dataSource(dataSource)
+				.sql(sql)
+				.beanMapped()
+				.build();
+	}
+
 
 	@Bean
 	public Step stepTransferToDatabase(JobRepository jobRepository, PlatformTransactionManager transactionManager,
@@ -93,20 +106,24 @@ public class MoneyMapperConfiguration {
 	}
 
 	@Bean
-	public Step outputResultsToCsv(JobRepository jobRepository, PlatformTransactionManager transactionManager,
-			JdbcCursorItemReader<Transaction> databaseReader, FlatFileItemWriter<Transaction> csvItemWriter) {
-		return new StepBuilder("outputResultsToCsv", jobRepository)
+	public Step stepMarkAccountTransferTransactions(JobRepository jobRepository, PlatformTransactionManager transactionManager,
+			JdbcCursorItemReader<Transaction> itemReader,
+			AccountTransferProcessor accountTransferProcessor,
+			@Qualifier("transactionDataTableTransferUpdate") JdbcBatchItemWriter<Transaction> itemWriter) {
+
+		return new StepBuilder("accountTransferStep", jobRepository)
 				.<Transaction, Transaction>chunk(100, transactionManager)
-				.reader(databaseReader)
-				.writer(csvItemWriter)
+				.reader(itemReader)
+				.processor(accountTransferProcessor)
+				.writer(itemWriter)
 				.build();
 	}
 
 	@Bean
 	public Step stepCategorizeTransactions(JobRepository jobRepository, PlatformTransactionManager transactionManager,
 			JdbcCursorItemReader<Transaction> itemReader,
-			ItemProcessor<Transaction, Transaction> itemProcessor,
-			@Qualifier("transactionDataTableUpdate") JdbcBatchItemWriter<Transaction> itemWriter) {
+			TransactionProcessor itemProcessor,
+			@Qualifier("transactionDataTableCategoryUpdate") JdbcBatchItemWriter<Transaction> itemWriter) {
 		return new StepBuilder("processTransactions", jobRepository)
 				.<Transaction, Transaction>chunk(100, transactionManager)
 				.reader(itemReader)
@@ -116,12 +133,27 @@ public class MoneyMapperConfiguration {
 	}
 
 	@Bean
-	public Job moneyMapperJob(JobRepository jobRepository, Step stepTransferToDatabase, Step stepCategorizeTransactions, Step outputResultsToCsv) {
+	public Step stepOutputResultsToCsv(JobRepository jobRepository, PlatformTransactionManager transactionManager,
+			JdbcCursorItemReader<Transaction> databaseReader, FlatFileItemWriter<Transaction> csvItemWriter) {
+		return new StepBuilder("outputResultsToCsv", jobRepository)
+				.<Transaction, Transaction>chunk(100, transactionManager)
+				.reader(databaseReader)
+				.writer(csvItemWriter)
+				.build();
+	}
+
+	@Bean
+	public Job moneyMapperJob(JobRepository jobRepository,
+			Step stepTransferToDatabase,
+			Step stepMarkAccountTransferTransactions,
+			Step stepCategorizeTransactions,
+			Step stepOutputResultsToCsv) {
 		return new JobBuilder("moneyMapperJob", jobRepository)
 				.incrementer(new RunIdIncrementer())
 				.start(stepTransferToDatabase)
+				.next(stepMarkAccountTransferTransactions)
 				.next(stepCategorizeTransactions)
-				.next(outputResultsToCsv)
+				.next(stepOutputResultsToCsv)
 				.build();
 	}
 }
