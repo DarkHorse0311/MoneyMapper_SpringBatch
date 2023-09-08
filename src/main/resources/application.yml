@@ -2,3 +2,6 @@ spring:
   profiles:
     include:
       - transactionclassification
+  batch:
+    job:
+      enabled: false

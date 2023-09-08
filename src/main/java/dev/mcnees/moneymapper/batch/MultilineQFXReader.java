@@ -32,9 +32,10 @@ public class MultilineQFXReader implements ItemReader<Transaction>, ItemStream {
 
 	private final StatementTransactionTokenizer statementTransactionTokenizer = new StatementTransactionTokenizer();
 
+
 	public MultilineQFXReader(Resource resource) {
 		delegate = new FlatFileItemReader<>();
-
+		
 		delegate.setResource(resource);
 
 		DefaultLineMapper lineMapper = new DefaultLineMapper();
@@ -147,8 +148,6 @@ class StatementTransactionTokenizer implements LineTokenizer {
 
 		return tokens;
 	}
-
-	// why can't I override doTokenize?  That's the one I really want to override.
 }
 
 class DefaultTokenizer implements LineTokenizer {
