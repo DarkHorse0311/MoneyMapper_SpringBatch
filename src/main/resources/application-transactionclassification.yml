@@ -5,3 +5,6 @@ transactionclassification:
       category: "Insurance"
     - description: "ONLINE CREDIT CA"
       tag: "Account Transfer"
+    - description: "McDonald's"
+      tag: "Eating Out"
+      category: "Fast Food"
