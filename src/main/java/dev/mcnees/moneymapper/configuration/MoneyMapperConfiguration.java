@@ -44,7 +44,7 @@ public class MoneyMapperConfiguration {
 				.resource(new PathResource("output/sample-out.txt"))
 				.lineSeparator("\r\n").delimited()
 				.delimiter(",")
-				.fieldExtractor(transaction -> new Object[] {transaction.getDescription(), transaction.getAmount(), transaction.getTag(), transaction.getCategory()})
+				.fieldExtractor(transaction -> new Object[] {transaction.getId(), transaction.getDescription(), transaction.getAmount(), transaction.getTag(), transaction.getCategory()})
 				.build();
 	}
 
@@ -61,7 +61,7 @@ public class MoneyMapperConfiguration {
 
 	@Bean
 	public JdbcBatchItemWriter<Transaction> transactionDataTableWriter(DataSource dataSource) {
-		String sql = "insert into MONEY_MAPPER values (:description, :amount, :tag, :category)";
+		String sql = "insert into MONEY_MAPPER values (:id, :description, :amount, :tag, :category)";
 		return new JdbcBatchItemWriterBuilder<Transaction>()
 				.dataSource(dataSource)
 				.sql(sql)

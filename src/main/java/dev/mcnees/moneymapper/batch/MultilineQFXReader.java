@@ -57,6 +57,7 @@ public class MultilineQFXReader implements ItemReader<Transaction>, ItemStream {
 		tokenizerMap.put("<STMTTRN>", statementTransactionTokenizer);
 		tokenizerMap.put("<TRNAMT>*", statementTransactionTokenizer);
 		tokenizerMap.put("<NAME>*", statementTransactionTokenizer);
+		tokenizerMap.put("<FITID>*", statementTransactionTokenizer);
 		tokenizerMap.put("</STMTTRN>", statementTransactionTokenizer);
 		tokenizerMap.put("*", new DefaultTokenizer()); //ignore anything that isn't a tag of interest
 
@@ -79,6 +80,9 @@ public class MultilineQFXReader implements ItemReader<Transaction>, ItemStream {
 				}
 				else if (dataField.equals("NAME")) {
 					transaction.setDescription(line.readString(2));
+				}
+				else if (dataField.equals("FITID")) {
+					transaction.setId(line.readString(2));
 				}
 			}
 			else if (controlKey.equals("qfx-end")) {
