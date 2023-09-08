@@ -14,12 +14,14 @@ import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
+import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.database.JdbcBatchItemWriter;
 import org.springframework.batch.item.database.JdbcCursorItemReader;
 import org.springframework.batch.item.database.builder.JdbcBatchItemWriterBuilder;
 import org.springframework.batch.item.database.builder.JdbcCursorItemReaderBuilder;
 import org.springframework.batch.item.file.FlatFileItemWriter;
 import org.springframework.batch.item.file.builder.FlatFileItemWriterBuilder;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -70,12 +72,21 @@ public class MoneyMapperConfiguration {
 	}
 
 	@Bean
+	public JdbcBatchItemWriter<Transaction> transactionDataTableUpdate(DataSource dataSource) {
+		String sql = "update MONEY_MAPPER set TAG=:tag, CATEGORY=:category where ID=:id";
+		return new JdbcBatchItemWriterBuilder<Transaction>()
+				.dataSource(dataSource)
+				.sql(sql)
+				.beanMapped()
+				.build();
+	}
+
+	@Bean
 	public Step stepTransferToDatabase(JobRepository jobRepository, PlatformTransactionManager transactionManager,
 			MultilineQFXReader qfxItemReader,
-			//FlatFileItemWriter<Transaction> itemWriter) {
-			JdbcBatchItemWriter<Transaction> itemWriter) {
+			@Qualifier("transactionDataTableWriter") JdbcBatchItemWriter<Transaction> itemWriter) {
 		return new StepBuilder("stepReadAndStoreRawTransactions", jobRepository)
-				.<Transaction, Transaction>chunk(10, transactionManager)
+				.<Transaction, Transaction>chunk(100, transactionManager)
 				.reader(qfxItemReader)
 				.writer(itemWriter)
 				.build();
@@ -85,27 +96,31 @@ public class MoneyMapperConfiguration {
 	public Step outputResultsToCsv(JobRepository jobRepository, PlatformTransactionManager transactionManager,
 			JdbcCursorItemReader<Transaction> databaseReader, FlatFileItemWriter<Transaction> csvItemWriter) {
 		return new StepBuilder("outputResultsToCsv", jobRepository)
-				.<Transaction, Transaction>chunk(10, transactionManager)
+				.<Transaction, Transaction>chunk(100, transactionManager)
 				.reader(databaseReader)
 				.writer(csvItemWriter)
 				.build();
 	}
-//	@Bean
-//	public Step stepCategorizeTransactions(JobRepository jobRepository, PlatformTransactionManager transactionManager,
-//			ItemReader<Transaction> itemReader, ItemProcessor<Transaction, Transaction> itemProcessor, FlatFileItemWriter<Transaction> itemWriter) {
-//		return new StepBuilder("processTransactions", jobRepository)
-//				.<Transaction, Transaction>chunk(10, transactionManager)
-//				.reader(itemReader)
-//				.processor(itemProcessor)
-//				.writer(itemWriter)
-//				.build();
-//	}
 
 	@Bean
-	public Job moneyMapperJob(JobRepository jobRepository, Step stepTransferToDatabase, Step outputResultsToCsv) {
+	public Step stepCategorizeTransactions(JobRepository jobRepository, PlatformTransactionManager transactionManager,
+			JdbcCursorItemReader<Transaction> itemReader,
+			ItemProcessor<Transaction, Transaction> itemProcessor,
+			@Qualifier("transactionDataTableUpdate") JdbcBatchItemWriter<Transaction> itemWriter) {
+		return new StepBuilder("processTransactions", jobRepository)
+				.<Transaction, Transaction>chunk(100, transactionManager)
+				.reader(itemReader)
+				.processor(itemProcessor)
+				.writer(itemWriter)
+				.build();
+	}
+
+	@Bean
+	public Job moneyMapperJob(JobRepository jobRepository, Step stepTransferToDatabase, Step stepCategorizeTransactions, Step outputResultsToCsv) {
 		return new JobBuilder("moneyMapperJob", jobRepository)
 				.incrementer(new RunIdIncrementer())
 				.start(stepTransferToDatabase)
+				.next(stepCategorizeTransactions)
 				.next(outputResultsToCsv)
 				.build();
 	}
