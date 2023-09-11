@@ -27,3 +27,10 @@ docker exec -u postgres money-mapper-postgres psql postgres -f /mnt/schema-money
 docker exec money-mapper-postgres psql -U postgres -c 'select * from MONEY_MAPPER'
 
 
+### Running with custom input directory
+
+java -jar target/money-mapper-0.0.1-SNAPSHOT.jar --qfx_folder=/file/system/testDir
+
+mvn spring-boot:run -Dspring-boot.run.arguments="--qfx_folder=/file/system/testDir"
+
+

@@ -15,6 +15,7 @@ import org.springframework.batch.core.JobParameter;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.core.launch.JobLauncher;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -31,6 +32,9 @@ public class MoneyMapperRunner implements ApplicationRunner {
 
 	private final JdbcTemplate jdbcTemplate;
 
+	@Value("${qfx_folder:qfx_files}")
+	private String qfx_folder;
+
 	public MoneyMapperRunner(JobLauncher jobLauncher, Job moneyMapperJob, DataSource dataSource) {
 		this.jobLauncher = jobLauncher;
 		this.moneyMapperJob = moneyMapperJob;
@@ -42,7 +46,15 @@ public class MoneyMapperRunner implements ApplicationRunner {
 
 		clearProcessingData();
 
-		List<File> allQuickenFiles = getAllQuickenFiles(new File("qfx_files"));
+		File qfx_file_location = new File(qfx_folder);
+
+		if(!qfx_file_location.isDirectory()) {
+			log.error("Specified location of " + qfx_folder + " is not a directory");
+			throw new Exception("Must specify a director for QFX file processing.");
+		}
+
+		List<File> allQuickenFiles = getAllQuickenFiles(qfx_file_location);
+
 
 		JobParameters jobParameters;
 		for (File quickenFile : allQuickenFiles) {
