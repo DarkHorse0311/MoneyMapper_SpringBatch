@@ -24,14 +24,14 @@ public class AccountTransferProcessor implements ItemProcessor<Transaction, Tran
 	@Override
 	public Transaction process(Transaction item) throws Exception {
 
-		List<Transaction> matchingAmountTransactions = jdbcTemplate.query("select id, amount from MONEY_MAPPER where AMOUNT = ?",
+		List<Transaction> matchingAmountTransactions = jdbcTemplate.query("select id, date, amount from MONEY_MAPPER where AMOUNT = ?",
 				new Object[] { -item.getAmount() },
 				new int[] { Types.FLOAT },
-				(rs, rowNum) -> new Transaction(rs.getString("id"), null, rs.getDouble("amount"), null, null));
+				(rs, rowNum) -> new Transaction(rs.getString("id"), rs.getDate("date"), null, rs.getDouble("amount"), null, null));
 
 		// TODO: match on date as well.  transactions need to be close together to be considered a transfer
 		// Can add a flag to the MONEY_MAPPER table to not report these records to the final CSV
-		if(CollectionUtils.isEmpty(matchingAmountTransactions)) {
+		if(matchingAmountTransactions != null && matchingAmountTransactions.size() > 0) {
 			item.setTag("Automatic Add - Likely Account Transfer");
 		}
 

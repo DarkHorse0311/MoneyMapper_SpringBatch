@@ -1,13 +1,16 @@
 package dev.mcnees.moneymapper.domain;
 
+import java.util.Date;
+
 public class Transaction {
 
 	public Transaction() {
 
 	}
 
-	public Transaction(String id, String description, Double amount, String tag, String category) {
+	public Transaction(String id, Date date, String description, Double amount, String tag, String category) {
 		this.id = id;
+		this.date = date;
 		this.description = description;
 		this.amount = amount;
 		this.tag = tag;
@@ -15,6 +18,8 @@ public class Transaction {
 	}
 
 	private String id;
+
+	private Date date;
 
 	private String description;
 
@@ -30,6 +35,14 @@ public class Transaction {
 
 	public void setId(String id) {
 		this.id = id;
+	}
+
+	public Date getDate() {
+		return date;
+	}
+
+	public void setDate(Date date) {
+		this.date = date;
 	}
 
 	public String getDescription() {

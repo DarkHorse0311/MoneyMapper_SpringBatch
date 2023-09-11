@@ -1,6 +1,7 @@
 package dev.mcnees.moneymapper.configuration;
 
 import java.io.File;
+import java.text.SimpleDateFormat;
 
 import javax.sql.DataSource;
 
@@ -43,12 +44,19 @@ public class MoneyMapperConfiguration {
 
 	@Bean
 	public FlatFileItemWriter<Transaction> writeFinalOutputToCSV() {
+		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMdd");
 		return new FlatFileItemWriterBuilder<Transaction>()
 				.name("txWriter")
 				.resource(new PathResource("output/sample-out.txt"))
 				.lineSeparator("\r\n").delimited()
 				.delimiter(",")
-				.fieldExtractor(transaction -> new Object[] {transaction.getId(), transaction.getDescription(), transaction.getAmount(), transaction.getTag(), transaction.getCategory()})
+				.fieldExtractor(transaction -> new Object[] {
+						simpleDateFormat.format(transaction.getDate()),
+						transaction.getId(),
+						transaction.getDescription(),
+						transaction.getAmount(),
+						transaction.getTag(),
+						transaction.getCategory()})
 				.build();
 	}
 
@@ -65,7 +73,7 @@ public class MoneyMapperConfiguration {
 
 	@Bean
 	public JdbcBatchItemWriter<Transaction> transactionDataTableWriter(DataSource dataSource) {
-		String sql = "insert into MONEY_MAPPER values (:id, :description, :amount, :tag, :category)";
+		String sql = "insert into MONEY_MAPPER values (:id, :date, :description, :amount, :tag, :category)";
 		return new JdbcBatchItemWriterBuilder<Transaction>()
 				.dataSource(dataSource)
 				.sql(sql)

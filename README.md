@@ -24,3 +24,6 @@ docker cp src/main/sql/schema-money-mapper.sql money-mapper-postgres:/mnt/schema
 docker exec -u postgres money-mapper-postgres psql postgres -f /mnt/schema-drop-money-mapper.sql
 docker exec -u postgres money-mapper-postgres psql postgres -f /mnt/schema-money-mapper.sql
 
+docker exec money-mapper-postgres psql -U postgres -c 'select * from MONEY_MAPPER'
+
+
