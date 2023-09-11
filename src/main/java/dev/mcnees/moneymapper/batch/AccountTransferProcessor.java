@@ -2,6 +2,7 @@ package dev.mcnees.moneymapper.batch;
 
 import java.sql.Types;
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 import javax.sql.DataSource;
@@ -33,9 +34,12 @@ public class AccountTransferProcessor implements ItemProcessor<Transaction, Tran
 		// TODO: match on date as well.  transactions need to be close together to be considered a transfer
 		// Can add a flag to the MONEY_MAPPER table to not report these records to the final CSV
 		if(matchingAmountTransactions != null && matchingAmountTransactions.size() > 0) {
-			item.setTag("Automatic Add - Likely Account Transfer");
+			LocalDate transactionDate = matchingAmountTransactions.get(0).getDate();
+			long daysBetweenPotentialTransfer = item.getDate().until(transactionDate, ChronoUnit.DAYS);
+			if (Math.abs(daysBetweenPotentialTransfer) <= 7) {
+				item.setTag("Automatic Add - Probable Transfer");
+			}
 		}
-
 		return item;
 	}
 }
