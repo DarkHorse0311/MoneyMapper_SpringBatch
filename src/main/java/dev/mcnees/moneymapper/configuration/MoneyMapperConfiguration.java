@@ -2,6 +2,8 @@ package dev.mcnees.moneymapper.configuration;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
 import javax.sql.DataSource;
 
@@ -44,14 +46,14 @@ public class MoneyMapperConfiguration {
 
 	@Bean
 	public FlatFileItemWriter<Transaction> writeFinalOutputToCSV() {
-		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMdd");
+		DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyyMMdd");
 		return new FlatFileItemWriterBuilder<Transaction>()
 				.name("txWriter")
 				.resource(new PathResource("output/sample-out.txt"))
 				.lineSeparator("\r\n").delimited()
 				.delimiter(",")
 				.fieldExtractor(transaction -> new Object[] {
-						simpleDateFormat.format(transaction.getDate()),
+						transaction.getDate().format(dateTimeFormatter),
 						transaction.getId(),
 						transaction.getDescription(),
 						transaction.getAmount(),

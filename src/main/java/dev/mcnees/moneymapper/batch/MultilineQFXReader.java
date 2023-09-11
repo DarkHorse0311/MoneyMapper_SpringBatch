@@ -1,9 +1,9 @@
 package dev.mcnees.moneymapper.batch;
 
-import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,7 +34,7 @@ public class MultilineQFXReader implements ItemReader<Transaction>, ItemStream {
 
 	private final StatementTransactionTokenizer statementTransactionTokenizer = new StatementTransactionTokenizer();
 
-	private static final SimpleDateFormat QFX_DATE_FORMAT = new SimpleDateFormat("yyyyMMddHHmmss");
+	private static final DateTimeFormatter QFX_DATE_FORMAT = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
 
 	public MultilineQFXReader(Resource resource) {
 		delegate = new FlatFileItemReader<>();
@@ -89,7 +89,8 @@ public class MultilineQFXReader implements ItemReader<Transaction>, ItemStream {
 					transaction.setId(line.readString(2));
 				}
 				else if(dataField.equals("DTUSER")) {
-					transaction.setDate(QFX_DATE_FORMAT.parse(line.readString(2)));
+					LocalDateTime transactionDateTime = LocalDateTime.parse(line.readString(2), QFX_DATE_FORMAT);
+					transaction.setDate(transactionDateTime.toLocalDate());
 				}
 			}
 			else if (controlKey.equals("qfx-end")) {

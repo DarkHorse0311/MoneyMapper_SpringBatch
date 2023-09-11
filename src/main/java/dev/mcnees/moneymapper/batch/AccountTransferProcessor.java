@@ -1,6 +1,7 @@
 package dev.mcnees.moneymapper.batch;
 
 import java.sql.Types;
+import java.time.LocalDate;
 import java.util.List;
 
 import javax.sql.DataSource;
@@ -10,7 +11,7 @@ import dev.mcnees.moneymapper.domain.Transaction;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
+
 
 @Component
 public class AccountTransferProcessor implements ItemProcessor<Transaction, Transaction> {
@@ -27,7 +28,7 @@ public class AccountTransferProcessor implements ItemProcessor<Transaction, Tran
 		List<Transaction> matchingAmountTransactions = jdbcTemplate.query("select id, date, amount from MONEY_MAPPER where AMOUNT = ?",
 				new Object[] { -item.getAmount() },
 				new int[] { Types.FLOAT },
-				(rs, rowNum) -> new Transaction(rs.getString("id"), rs.getDate("date"), null, rs.getDouble("amount"), null, null));
+				(rs, rowNum) -> new Transaction(rs.getString("id"), rs.getObject("date", LocalDate.class), null, rs.getDouble("amount"), null, null));
 
 		// TODO: match on date as well.  transactions need to be close together to be considered a transfer
 		// Can add a flag to the MONEY_MAPPER table to not report these records to the final CSV
