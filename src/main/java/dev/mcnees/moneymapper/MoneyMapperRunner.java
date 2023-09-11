@@ -32,8 +32,11 @@ public class MoneyMapperRunner implements ApplicationRunner {
 
 	private final JdbcTemplate jdbcTemplate;
 
-	@Value("${qfx_folder:qfx_files}")
-	private String qfx_folder;
+	@Value("${qfx_directory:qfx_files}")
+	private String qfx_directory_parameter;
+
+	@Value("${output_directory:output}")
+	private String output_directory_parameter;
 
 	public MoneyMapperRunner(JobLauncher jobLauncher, Job moneyMapperJob, DataSource dataSource) {
 		this.jobLauncher = jobLauncher;
@@ -46,20 +49,26 @@ public class MoneyMapperRunner implements ApplicationRunner {
 
 		clearProcessingData();
 
-		File qfx_file_location = new File(qfx_folder);
-
-		if(!qfx_file_location.isDirectory()) {
-			log.error("Specified location of " + qfx_folder + " is not a directory");
-			throw new Exception("Must specify a director for QFX file processing.");
+		File qfx_directory = new File(qfx_directory_parameter);
+		if (!qfx_directory.isDirectory()) {
+			log.error("Specified qfx input location of " + qfx_directory_parameter + " is not a directory");
+			throw new Exception("Must specify a directory for QFX file processing.");
 		}
 
-		List<File> allQuickenFiles = getAllQuickenFiles(qfx_file_location);
+		File output_directory = new File(output_directory_parameter);
+		if (!output_directory.isDirectory()) {
+			log.error("Specified output location of " + output_directory_parameter + " is not a directory");
+			throw new Exception("Must specify a valid file for output.");
+		}
+		File output_file = new File(output_directory + "/money_mapper_output.csv");
 
+		List<File> allQuickenFiles = getAllQuickenFiles(qfx_directory);
 
 		JobParameters jobParameters;
 		for (File quickenFile : allQuickenFiles) {
 			jobParameters = new JobParametersBuilder()
-					.addJobParameter("file", new JobParameter<>(quickenFile, File.class))
+					.addJobParameter("input_file", new JobParameter<>(quickenFile, File.class))
+					.addJobParameter("output_file", new JobParameter<>(output_file, File.class))
 					.addJobParameter("datetime", new JobParameter<>(Instant.now().toEpochMilli(), Long.class))
 					.toJobParameters();
 

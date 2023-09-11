@@ -1,8 +1,6 @@
 package dev.mcnees.moneymapper.configuration;
 
 import java.io.File;
-import java.text.SimpleDateFormat;
-import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
 import javax.sql.DataSource;
@@ -19,7 +17,6 @@ import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
-import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.database.JdbcBatchItemWriter;
 import org.springframework.batch.item.database.JdbcCursorItemReader;
 import org.springframework.batch.item.database.builder.JdbcBatchItemWriterBuilder;
@@ -31,7 +28,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.FileSystemResource;
-import org.springframework.core.io.PathResource;
 import org.springframework.jdbc.core.DataClassRowMapper;
 import org.springframework.transaction.PlatformTransactionManager;
 
@@ -40,16 +36,17 @@ public class MoneyMapperConfiguration {
 
 	@Bean
 	@StepScope
-	public MultilineQFXReader qfxItemReader(@Value("#{jobParameters['file']}") File file) {
+	public MultilineQFXReader qfxItemReader(@Value("#{jobParameters['input_file']}") File file) {
 		return new MultilineQFXReader(new FileSystemResource(file));
 	}
 
 	@Bean
-	public FlatFileItemWriter<Transaction> writeFinalOutputToCSV() {
+	@StepScope
+	public FlatFileItemWriter<Transaction> writeFinalOutputToCSV(@Value("#{jobParameters['output_file']}") File file) {
 		DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyyMMdd");
 		return new FlatFileItemWriterBuilder<Transaction>()
 				.name("txWriter")
-				.resource(new PathResource("output/sample-out.txt"))
+				.resource(new FileSystemResource(file))
 				.lineSeparator("\r\n").delimited()
 				.delimiter(",")
 				.fieldExtractor(transaction -> new Object[] {
