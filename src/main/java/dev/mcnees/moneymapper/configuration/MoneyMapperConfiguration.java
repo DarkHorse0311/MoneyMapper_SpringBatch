@@ -7,6 +7,7 @@ import javax.sql.DataSource;
 
 import dev.mcnees.moneymapper.batch.AccountTransferProcessor;
 import dev.mcnees.moneymapper.batch.MultilineQFXReader;
+import dev.mcnees.moneymapper.batch.TransactionFilterDuplicateItemProcessor;
 import dev.mcnees.moneymapper.batch.TransactionProcessor;
 import dev.mcnees.moneymapper.domain.Transaction;
 
@@ -61,7 +62,7 @@ public class MoneyMapperConfiguration {
 
 	@Bean
 	public JdbcCursorItemReader<Transaction> databaseTransactionReader(DataSource dataSource) {
-		String sql = "select * from MONEY_MAPPER";
+		String sql = "select * from MONEY_MAPPER order by date desc";
 		return new JdbcCursorItemReaderBuilder<Transaction>()
 				.name("moneyMapperTableReader")
 				.dataSource(dataSource)
@@ -104,10 +105,12 @@ public class MoneyMapperConfiguration {
 	@Bean
 	public Step stepTransferToDatabase(JobRepository jobRepository, PlatformTransactionManager transactionManager,
 			MultilineQFXReader qfxItemReader,
+			TransactionFilterDuplicateItemProcessor itemProcessor,
 			@Qualifier("transactionDataTableWriter") JdbcBatchItemWriter<Transaction> itemWriter) {
 		return new StepBuilder("stepReadAndStoreRawTransactions", jobRepository)
 				.<Transaction, Transaction>chunk(100, transactionManager)
 				.reader(qfxItemReader)
+				.processor(itemProcessor)
 				.writer(itemWriter)
 				.build();
 	}
