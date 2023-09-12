@@ -22,3 +22,4 @@ _site/
 .DS_Store
 sample-out.txt
 qfx_files/
+/output/money_mapper_output.csv

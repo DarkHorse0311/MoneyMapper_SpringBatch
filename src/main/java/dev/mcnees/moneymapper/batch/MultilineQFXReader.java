@@ -1,5 +1,6 @@
 package dev.mcnees.moneymapper.batch;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -34,7 +35,7 @@ public class MultilineQFXReader implements ItemReader<Transaction>, ItemStream {
 
 	private final StatementTransactionTokenizer statementTransactionTokenizer = new StatementTransactionTokenizer();
 
-	private static final DateTimeFormatter QFX_DATE_FORMAT = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
+	private static final DateTimeFormatter QFX_DATE_FORMAT = DateTimeFormatter.ofPattern("yyyyMMdd");
 
 	public MultilineQFXReader(Resource resource) {
 		delegate = new FlatFileItemReader<>();
@@ -61,7 +62,7 @@ public class MultilineQFXReader implements ItemReader<Transaction>, ItemStream {
 		tokenizerMap.put("<TRNAMT>*", statementTransactionTokenizer);
 		tokenizerMap.put("<NAME>*", statementTransactionTokenizer);
 		tokenizerMap.put("<FITID>*", statementTransactionTokenizer);
-		tokenizerMap.put("<DTUSER>*", statementTransactionTokenizer);
+		tokenizerMap.put("<DTPOSTED>*", statementTransactionTokenizer);
 		tokenizerMap.put("</STMTTRN>", statementTransactionTokenizer);
 		tokenizerMap.put("*", new DefaultTokenizer()); //ignore anything that isn't a tag of interest
 
@@ -88,9 +89,11 @@ public class MultilineQFXReader implements ItemReader<Transaction>, ItemStream {
 				else if (dataField.equals("FITID")) {
 					transaction.setId(line.readString(2));
 				}
-				else if(dataField.equals("DTUSER")) {
-					LocalDateTime transactionDateTime = LocalDateTime.parse(line.readString(2), QFX_DATE_FORMAT);
-					transaction.setDate(transactionDateTime.toLocalDate());
+				else if(dataField.equals("DTPOSTED")) {
+					String dateTimeString = line.readString(2);
+					String dateString = dateTimeString.substring(0,8);
+					LocalDate transactionDate = LocalDate.parse(dateString, QFX_DATE_FORMAT);
+					transaction.setDate(transactionDate);
 				}
 			}
 			else if (controlKey.equals("qfx-end")) {
