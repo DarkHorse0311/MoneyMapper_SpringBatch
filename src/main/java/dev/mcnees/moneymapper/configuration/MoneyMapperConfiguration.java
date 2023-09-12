@@ -7,6 +7,7 @@ import javax.sql.DataSource;
 
 import dev.mcnees.moneymapper.batch.AccountTransferProcessor;
 import dev.mcnees.moneymapper.batch.MultilineQFXReader;
+import dev.mcnees.moneymapper.batch.TransactionCleansingProcessor;
 import dev.mcnees.moneymapper.batch.TransactionFilterDuplicateItemProcessor;
 import dev.mcnees.moneymapper.batch.TransactionProcessor;
 import dev.mcnees.moneymapper.domain.Transaction;
@@ -44,15 +45,15 @@ public class MoneyMapperConfiguration {
 	@Bean
 	@StepScope
 	public FlatFileItemWriter<Transaction> writeFinalOutputToCSV(@Value("#{jobParameters['output_file']}") File file) {
-		DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyyMMdd");
+		DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("MM/dd/yyyy");
 		return new FlatFileItemWriterBuilder<Transaction>()
 				.name("txWriter")
 				.resource(new FileSystemResource(file))
 				.lineSeparator("\r\n").delimited()
 				.delimiter(",")
 				.fieldExtractor(transaction -> new Object[] {
-						transaction.getDate().format(dateTimeFormatter),
 						transaction.getId(),
+						transaction.getDate().format(dateTimeFormatter),
 						transaction.getDescription(),
 						transaction.getAmount(),
 						transaction.getTag(),
@@ -144,10 +145,13 @@ public class MoneyMapperConfiguration {
 
 	@Bean
 	public Step stepOutputResultsToCsv(JobRepository jobRepository, PlatformTransactionManager transactionManager,
-			JdbcCursorItemReader<Transaction> databaseReader, FlatFileItemWriter<Transaction> csvItemWriter) {
+			JdbcCursorItemReader<Transaction> databaseReader,
+			TransactionCleansingProcessor processor,
+			FlatFileItemWriter<Transaction> csvItemWriter) {
 		return new StepBuilder("outputResultsToCsv", jobRepository)
 				.<Transaction, Transaction>chunk(100, transactionManager)
 				.reader(databaseReader)
+				.processor(processor)
 				.writer(csvItemWriter)
 				.build();
 	}
