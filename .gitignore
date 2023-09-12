@@ -21,5 +21,5 @@ _site/
 .flattened-pom.xml
 .DS_Store
 sample-out.txt
-output/
+output/*
 qfx_files/
