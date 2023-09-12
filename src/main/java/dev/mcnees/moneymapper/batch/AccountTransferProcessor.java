@@ -7,6 +7,7 @@ import java.util.List;
 
 import javax.sql.DataSource;
 
+import dev.mcnees.moneymapper.configuration.MoneyMapperConstants;
 import dev.mcnees.moneymapper.domain.Transaction;
 
 import org.springframework.batch.item.ItemProcessor;
@@ -37,7 +38,7 @@ public class AccountTransferProcessor implements ItemProcessor<Transaction, Tran
 			LocalDate transactionDate = matchingAmountTransactions.get(0).getDate();
 			long daysBetweenPotentialTransfer = item.getDate().until(transactionDate, ChronoUnit.DAYS);
 			if (Math.abs(daysBetweenPotentialTransfer) <= 7) {
-				item.setTag("Automatic Add - Probable Transfer");
+				item.setTag(MoneyMapperConstants.AUTOMATIC_ACCOUNT_TRANSFER);
 			}
 		}
 		return item;
