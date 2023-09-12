@@ -8,13 +8,14 @@ public class Transaction {
 
 	}
 
-	public Transaction(String id, LocalDate date, String description, Double amount, String tag, String category) {
+	public Transaction(String id, LocalDate date, String description, Double amount, String tag, String category, Boolean transfer) {
 		this.id = id;
 		this.date = date;
 		this.description = description;
 		this.amount = amount;
 		this.tag = tag;
 		this.category = category;
+		this.transfer = transfer;
 	}
 
 	private String id;
@@ -28,6 +29,8 @@ public class Transaction {
 	private String tag;
 
 	private String category;
+
+	private Boolean transfer;
 
 	public String getId() {
 		return id;
@@ -75,5 +78,13 @@ public class Transaction {
 
 	public void setCategory(String category) {
 		this.category = category;
+	}
+
+	public Boolean getTransfer() {
+		return transfer;
+	}
+
+	public void setTransfer(Boolean transfer) {
+		this.transfer = transfer;
 	}
 }

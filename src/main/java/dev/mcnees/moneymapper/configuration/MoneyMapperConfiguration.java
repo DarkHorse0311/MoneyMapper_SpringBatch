@@ -5,11 +5,11 @@ import java.time.format.DateTimeFormatter;
 
 import javax.sql.DataSource;
 
-import dev.mcnees.moneymapper.batch.AccountTransferProcessor;
+import dev.mcnees.moneymapper.batch.TransactionIdentifyTransferProcessor;
 import dev.mcnees.moneymapper.batch.MultilineQFXReader;
 import dev.mcnees.moneymapper.batch.TransactionCleansingProcessor;
 import dev.mcnees.moneymapper.batch.TransactionFilterDuplicateItemProcessor;
-import dev.mcnees.moneymapper.batch.TransactionProcessor;
+import dev.mcnees.moneymapper.batch.TransactionClassificationProcessor;
 import dev.mcnees.moneymapper.domain.Transaction;
 
 import org.springframework.batch.core.Job;
@@ -74,7 +74,7 @@ public class MoneyMapperConfiguration {
 
 	@Bean
 	public JdbcBatchItemWriter<Transaction> transactionDataTableWriter(DataSource dataSource) {
-		String sql = "insert into MONEY_MAPPER values (:id, :date, :description, :amount, :tag, :category)";
+		String sql = "insert into MONEY_MAPPER values (:id, :date, :description, :amount, :tag, :category, :transfer)";
 		return new JdbcBatchItemWriterBuilder<Transaction>()
 				.dataSource(dataSource)
 				.sql(sql)
@@ -94,7 +94,7 @@ public class MoneyMapperConfiguration {
 
 	@Bean
 	public JdbcBatchItemWriter<Transaction> transactionDataTableTransferUpdate(DataSource dataSource) {
-		String sql = "update MONEY_MAPPER set TAG=:tag where ID=:id";
+		String sql = "update MONEY_MAPPER set TAG=:tag, TRANSFER=:transfer where ID=:id";
 		return new JdbcBatchItemWriterBuilder<Transaction>()
 				.dataSource(dataSource)
 				.sql(sql)
@@ -119,13 +119,13 @@ public class MoneyMapperConfiguration {
 	@Bean
 	public Step stepMarkAccountTransferTransactions(JobRepository jobRepository, PlatformTransactionManager transactionManager,
 			JdbcCursorItemReader<Transaction> itemReader,
-			AccountTransferProcessor accountTransferProcessor,
+			TransactionIdentifyTransferProcessor transactionIdentifyTransferProcessor,
 			@Qualifier("transactionDataTableTransferUpdate") JdbcBatchItemWriter<Transaction> itemWriter) {
 
 		return new StepBuilder("accountTransferStep", jobRepository)
 				.<Transaction, Transaction>chunk(100, transactionManager)
 				.reader(itemReader)
-				.processor(accountTransferProcessor)
+				.processor(transactionIdentifyTransferProcessor)
 				.writer(itemWriter)
 				.build();
 	}
@@ -133,7 +133,7 @@ public class MoneyMapperConfiguration {
 	@Bean
 	public Step stepCategorizeTransactions(JobRepository jobRepository, PlatformTransactionManager transactionManager,
 			JdbcCursorItemReader<Transaction> itemReader,
-			TransactionProcessor itemProcessor,
+			TransactionClassificationProcessor itemProcessor,
 			@Qualifier("transactionDataTableCategoryUpdate") JdbcBatchItemWriter<Transaction> itemWriter) {
 		return new StepBuilder("processTransactions", jobRepository)
 				.<Transaction, Transaction>chunk(100, transactionManager)
