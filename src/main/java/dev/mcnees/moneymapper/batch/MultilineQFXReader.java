@@ -118,65 +118,68 @@ public class MultilineQFXReader implements ItemStreamReader<Transaction> {
 	public void update(ExecutionContext executionContext) throws ItemStreamException {
 		this.delegate.update(executionContext);
 	}
-}
 
 
-class StatementTransactionTokenizer implements LineTokenizer {
+	class StatementTransactionTokenizer implements LineTokenizer {
 
-	private FieldSetFactory fieldSetFactory = new DefaultFieldSetFactory();
+		private FieldSetFactory fieldSetFactory = new DefaultFieldSetFactory();
 
-	@Override
-	public FieldSet tokenize(String line) {
-		if (line == null) {
-			line = "";
+		@Override
+		public FieldSet tokenize(String line) {
+			if (line == null) {
+				line = "";
+			}
+
+			List<String> tokens = new ArrayList<>(doTokenize(line));
+
+			String[] values = tokens.toArray(new String[tokens.size()]);
+
+			return fieldSetFactory.create(values);
 		}
 
-		List<String> tokens = new ArrayList<>(doTokenize(line));
+		private List<String> doTokenize(String line) {
+			ArrayList<String> tokens = new ArrayList<String>();
 
-		String[] values = tokens.toArray(new String[tokens.size()]);
+			if (line.equals("</STMTTRN>")) {
+				tokens.add("qfx-end");
+				return tokens;
+			}
 
-		return fieldSetFactory.create(values);
-	}
+			String[] splitLine = line.split(">");
 
-	private List<String> doTokenize(String line) {
-		ArrayList<String> tokens = new ArrayList<String>();
+			//if > 1 then there is a value associated to the tag
+			if (splitLine.length > 1) {
+				tokens.add("qfx-data");
+				// strip off the < at the beginning of the tag
+				tokens.add(splitLine[0].substring(1));
+				tokens.add(splitLine[1]);
+			}
+			else {
+				tokens.add("qfx-nodata");
+			}
 
-		if (line.equals("</STMTTRN>")) {
-			tokens.add("qfx-end");
 			return tokens;
 		}
-
-		String[] splitLine = line.split(">");
-
-		//if > 1 then there is a value associated to the tag
-		if (splitLine.length > 1) {
-			tokens.add("qfx-data");
-			// strip off the < at the beginning of the tag
-			tokens.add(splitLine[0].substring(1));
-			tokens.add(splitLine[1]);
-		}
-		else {
-			tokens.add("qfx-nodata");
-		}
-
-		return tokens;
 	}
+
+	class DefaultTokenizer implements LineTokenizer {
+
+		private FieldSetFactory fieldSetFactory = new DefaultFieldSetFactory();
+
+		@Override
+		public FieldSet tokenize(String line) {
+			if (line == null) {
+				line = "";
+			}
+
+			List<String> tokens = new ArrayList<>(Arrays.asList("qfx-ignore"));
+
+			String[] values = tokens.toArray(new String[tokens.size()]);
+
+			return fieldSetFactory.create(values);
+		}
+	}
+
 }
 
-class DefaultTokenizer implements LineTokenizer {
 
-	private FieldSetFactory fieldSetFactory = new DefaultFieldSetFactory();
-
-	@Override
-	public FieldSet tokenize(String line) {
-		if (line == null) {
-			line = "";
-		}
-
-		List<String> tokens = new ArrayList<>(Arrays.asList("qfx-ignore"));
-
-		String[] values = tokens.toArray(new String[tokens.size()]);
-
-		return fieldSetFactory.create(values);
-	}
-}
