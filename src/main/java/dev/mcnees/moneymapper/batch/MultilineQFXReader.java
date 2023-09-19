@@ -11,9 +11,8 @@ import java.util.Map;
 import dev.mcnees.moneymapper.domain.Transaction;
 
 import org.springframework.batch.item.ExecutionContext;
-import org.springframework.batch.item.ItemReader;
-import org.springframework.batch.item.ItemStream;
 import org.springframework.batch.item.ItemStreamException;
+import org.springframework.batch.item.ItemStreamReader;
 import org.springframework.batch.item.NonTransientResourceException;
 import org.springframework.batch.item.ParseException;
 import org.springframework.batch.item.UnexpectedInputException;
@@ -28,7 +27,7 @@ import org.springframework.batch.item.file.transform.PatternMatchingCompositeLin
 import org.springframework.core.io.Resource;
 
 
-public class MultilineQFXReader implements ItemReader<Transaction>, ItemStream {
+public class MultilineQFXReader implements ItemStreamReader<Transaction> {
 
 	private FlatFileItemReader<FieldSet> delegate;
 
