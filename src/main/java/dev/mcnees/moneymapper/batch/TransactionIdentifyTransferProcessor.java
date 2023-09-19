@@ -5,8 +5,6 @@ import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
-import javax.sql.DataSource;
-
 import dev.mcnees.moneymapper.domain.Transaction;
 
 import org.springframework.batch.item.ItemProcessor;
@@ -19,8 +17,8 @@ public class TransactionIdentifyTransferProcessor implements ItemProcessor<Trans
 
 	private final JdbcTemplate jdbcTemplate;
 
-	public TransactionIdentifyTransferProcessor(DataSource dataSource) {
-		jdbcTemplate = new JdbcTemplate(dataSource);
+	public TransactionIdentifyTransferProcessor(JdbcTemplate jdbcTemplate) {
+		this.jdbcTemplate = jdbcTemplate;
 	}
 
 	@Override
