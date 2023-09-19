@@ -68,8 +68,7 @@ public class MoneyMapperRunner implements ApplicationRunner {
 		for (File quickenFile : allQuickenFiles) {
 			jobParameters = new JobParametersBuilder()
 					.addJobParameter("input_file", new JobParameter<>(quickenFile, File.class))
-					.addJobParameter("outputFile", new JobParameter<>(outputFile, File.class))
-					.addJobParameter("datetime", new JobParameter<>(Instant.now().toEpochMilli(), Long.class))
+					.addJobParameter("output_file", new JobParameter<>(outputFile, File.class))
 					.toJobParameters();
 
 			jobLauncher.run(moneyMapperJob, jobParameters);
