@@ -33,10 +33,10 @@ public class MoneyMapperRunner implements ApplicationRunner {
 	private final JdbcTemplate jdbcTemplate;
 
 	@Value("${qfx_directory:qfx_files}")
-	private String qfx_directory_parameter;
+	private String qfxDirectoryParameter;
 
 	@Value("${output_directory:output}")
-	private String output_directory_parameter;
+	private String outputDirectoryParameter;
 
 	public MoneyMapperRunner(JobLauncher jobLauncher, Job moneyMapperJob, DataSource dataSource) {
 		this.jobLauncher = jobLauncher;
@@ -49,26 +49,26 @@ public class MoneyMapperRunner implements ApplicationRunner {
 
 		clearProcessingData();
 
-		File qfx_directory = new File(qfx_directory_parameter);
-		if (!qfx_directory.isDirectory()) {
-			log.error("Specified qfx input location of " + qfx_directory_parameter + " is not a directory");
+		File qfxDirectory = new File(qfxDirectoryParameter);
+		if (!qfxDirectory.isDirectory()) {
+			log.error("Specified qfx input location of " + qfxDirectoryParameter + " is not a directory");
 			throw new Exception("Must specify a directory for QFX file processing.");
 		}
 
-		File output_directory = new File(output_directory_parameter);
-		if (!output_directory.isDirectory()) {
-			log.error("Specified output location of " + output_directory_parameter + " is not a directory");
+		File outputDirectory = new File(outputDirectoryParameter);
+		if (!outputDirectory.isDirectory()) {
+			log.error("Specified output location of " + outputDirectoryParameter + " is not a directory");
 			throw new Exception("Must specify a valid file for output.");
 		}
-		File output_file = new File(output_directory + "/money_mapper_output.csv");
+		File outputFile = new File(outputDirectory + "/money_mapper_output.csv");
 
-		List<File> allQuickenFiles = getAllQuickenFiles(qfx_directory);
+		List<File> allQuickenFiles = getAllQuickenFiles(qfxDirectory);
 
 		JobParameters jobParameters;
 		for (File quickenFile : allQuickenFiles) {
 			jobParameters = new JobParametersBuilder()
 					.addJobParameter("input_file", new JobParameter<>(quickenFile, File.class))
-					.addJobParameter("output_file", new JobParameter<>(output_file, File.class))
+					.addJobParameter("outputFile", new JobParameter<>(outputFile, File.class))
 					.addJobParameter("datetime", new JobParameter<>(Instant.now().toEpochMilli(), Long.class))
 					.toJobParameters();
 
