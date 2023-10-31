@@ -11,15 +11,15 @@ import org.springframework.stereotype.Component;
 @Component
 public class TransactionFilterDuplicateItemProcessor implements ItemProcessor<Transaction, Transaction> {
 
-	private final Set<String> seenTransactions = new HashSet<>();
+	private final Set<Transaction> seenTransactions = new HashSet<>();
 
 	@Override
 	public Transaction process(Transaction item) throws Exception {
-		if(seenTransactions.contains(item.getId())) {
+		if (seenTransactions.contains(item)) {
 			return null;
 		}
 
-		seenTransactions.add(item.getId());
+		seenTransactions.add(item);
 		return item;
 	}
 }

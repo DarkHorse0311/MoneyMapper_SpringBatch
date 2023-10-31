@@ -87,4 +87,25 @@ public class Transaction {
 	public void setTransfer(Boolean transfer) {
 		this.transfer = transfer;
 	}
+
+
+	@Override
+	public int hashCode() {
+		return (int) date.hashCode() * description.hashCode() * amount.hashCode();
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (obj == this) {
+			return true;
+		}
+
+		if (!(obj instanceof Transaction)) {
+			return false;
+		}
+
+		Transaction other = (Transaction) obj;
+
+		return date.equals(other.getDate()) && description.equals(other.getDescription()) && amount.equals(other.getAmount());
+	}
 }
