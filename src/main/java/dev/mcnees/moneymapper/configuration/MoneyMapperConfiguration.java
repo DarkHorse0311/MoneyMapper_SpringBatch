@@ -84,7 +84,7 @@ public class MoneyMapperConfiguration {
 
 	@Bean
 	public JdbcBatchItemWriter<Transaction> transactionDataTableCategoryUpdate(DataSource dataSource) {
-		String sql = "update MONEY_MAPPER set TAG=:tag, CATEGORY=:category where ID=:id";
+		String sql = "update MONEY_MAPPER set TAG=:tag, CATEGORY=:category where DATE=:date AND DESCRIPTION=:description AND AMOUNT=:amount";
 		return new JdbcBatchItemWriterBuilder<Transaction>()
 				.dataSource(dataSource)
 				.sql(sql)
